@@ -25,7 +25,15 @@ public class FuncionariosRouter extends RouteBuilder {
 		.to("direct:stringJsonToListFuncionarios")
 		.process("funcionarioListSortNomeProcessor")
         .setBody(exchangeProperty("listaOrdenadaByNome"))
-		.to("direct:funcionarioListToJson");
+		.to("direct:funcionarioListToJson")
+		.endRest()
+		.get("/{id}")
+		.route()
+		.toD("http://localhost:8080/api/funcionarios/${header.id}?bridgeEndpoint=true")
+        .log("Response: ${body}")
+        .streamCaching()
+        .endRest();
+
 
 	}
 
