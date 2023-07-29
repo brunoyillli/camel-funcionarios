@@ -48,11 +48,8 @@ public class FuncionariosRouter extends RouteBuilder {
                 .unmarshal().json(JsonLibrary.Jackson, Funcionario.class) 
 	            .process("funcionarioSalaryRaiseProcessor")
 	            .marshal().json(JsonLibrary.Jackson)
-	            .setHeader(Exchange.HTTP_METHOD, constant("PUT"))
-	            .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-	            .toD("http://localhost:8080/api/funcionarios/${header.id}?bridgeEndpoint=true")
-	            .log("Updated funcionario data: ${body}")
-	        .end();
+	            .to("direct:updateFuncionario")
+	        .endRest();
 
 	}
 
