@@ -4,7 +4,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StringJsonToListFuncionarios extends RouteBuilder{
+public class StringJsonToListFuncionariosRouter extends RouteBuilder{
 
 	@Override
 	public void configure() throws Exception {

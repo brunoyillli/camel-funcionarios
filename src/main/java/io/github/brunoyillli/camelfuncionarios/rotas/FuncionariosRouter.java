@@ -3,6 +3,7 @@ package io.github.brunoyillli.camelfuncionarios.rotas;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,21 +35,24 @@ public class FuncionariosRouter extends RouteBuilder {
 			
 			.get("/{id}")
 				.route()
-				.toD("http://localhost:8080/api/funcionarios/${header.id}?bridgeEndpoint=true")
-		        .log("Response: ${body}")
-		        .streamCaching()
+			    .streamCaching()
+			    .to("direct:getFuncionario")
+				.log("Response: ${body}")
 	        .endRest()
 	        
 	        .put("/{id}/applyRaise")
 	        	.route()
-	            .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-	        	.toD("http://localhost:8080/api/funcionarios/${header.id}?bridgeEndpoint=true")
-	            .log("Received funcionario data: ${body}")
 	            .streamCaching()
-                .unmarshal().json(JsonLibrary.Jackson, Funcionario.class) 
-	            .process("funcionarioSalaryRaiseProcessor")
-	            .marshal().json(JsonLibrary.Jackson)
-	            .to("direct:updateFuncionario")
+	            .to("direct:getFuncionario")
+	        	.log("Received funcionario data: ${body}")
+	        	.choice()
+	        		.when(header(Exchange.HTTP_RESPONSE_CODE).isNotEqualTo(HttpStatus.SC_OK))
+	        			.stop()
+	        	.otherwise()
+	                .unmarshal().json(JsonLibrary.Jackson, Funcionario.class) 
+		            .process("funcionarioSalaryRaiseProcessor")
+		            .marshal().json(JsonLibrary.Jackson)
+		            .to("direct:updateFuncionario")
 	        .endRest();
 
 	}
